@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>멍치과 관리자 · 예약 관리</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#10302B; --muted:#4F6A64; --line:#CFE0DB;
+  --pine:#1F5E52; --pine-ink:#FFFFFF; --mist:#DDEBE7; --gum:#E4606D; --gum-soft:#FBE3E5;
+  --saffron:#F2B84B; --saffron-soft:#FDF1D6; --warn:#B3261E;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1D1A; --surface:#15291F; --ink:#E6F2EE; --muted:#9DB8B1; --line:#274039;
+    --pine:#6FC2AF; --pine-ink:#0B1F1A; --mist:#1B3530; --gum:#F0808B; --gum-soft:#3A2327;
+    --saffron:#F2B84B; --saffron-soft:#3A3120; --warn:#FF9C94; color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.6;font-size:15px}
+h1,h2{font-family:"Black Han Sans","Apple SD Gothic Neo",sans-serif;font-weight:400;margin:0;line-height:1.25}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:3px solid var(--saffron);outline-offset:2px;border-radius:6px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px}
+header h1{font-size:20px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:20}
+.btn{font:inherit;font-weight:600;border:2px solid var(--pine);background:var(--pine);color:var(--pine-ink);padding:8px 16px;border-radius:999px;cursor:pointer;min-height:40px}
+.btn.ghost{background:transparent;color:var(--pine)}
+.btn:disabled{opacity:.5;cursor:default}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;min-height:42px;width:100%}
+textarea{min-height:64px;resize:vertical}
+label{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+.err{color:var(--warn);font-size:14px;min-height:1.2em;margin-top:6px}
+
+.login{max-width:380px;margin:12vh auto 0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px}
+.login h2{font-size:26px;margin-bottom:6px}
+.login p{color:var(--muted);margin:0 0 18px}
+.login .f{margin-bottom:14px}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:20px}
+.tab{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 14px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tools{display:grid;grid-template-columns:2fr 1.4fr 1fr auto;gap:10px;margin-top:12px;align-items:end}
+.meta{color:var(--muted);font-size:14px;margin-top:14px}
+
+.list{margin:12px 0 60px;border-top:2px solid var(--ink)}
+.row{display:grid;grid-template-columns:150px minmax(0,1.4fr) minmax(0,1fr) 260px;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);align-items:start}
+.when b{font-size:18px;display:block}
+.when span{color:var(--muted);font-size:13px}
+.who b{font-size:16px}
+.who a{color:var(--pine);font-weight:600}
+.small{font-size:13px;color:var(--muted)}
+.memo{white-space:pre-wrap;overflow-wrap:anywhere}
+.st{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:99px;margin-bottom:6px}
+.st-대기{background:var(--saffron-soft)} .st-확정{background:var(--pine);color:var(--pine-ink)}
+.st-취소{background:var(--gum-soft)} .st-완료{background:var(--mist)}
+.act{display:flex;flex-direction:column;gap:8px}
+.act .line{display:flex;gap:8px}
+.empty{padding:40px 0;color:var(--muted);text-align:center}
+.past{opacity:.6}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.toast.show{opacity:1}
+@media (max-width:900px){
+  .row{grid-template-columns:1fr 1fr}
+  .act{grid-column:1/-1}
+  .tools{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){ .row,.tools{grid-template-columns:1fr} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>멍치과 예약 관리</h1>
+  <div style="display:flex;gap:8px">
+    <button class="btn ghost" id="refresh" hidden>새로고침</button>
+    <button class="btn ghost" id="logout" hidden>로그아웃</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <section id="login-view" class="login" hidden>
+    <h2>관리자 로그인</h2>
+    <p>Supabase에 등록한 관리자 계정으로 로그인하세요.</p>
+    <form id="login-form" novalidate>
+      <div class="f"><label for="email">이메일</label><input id="email" type="email" autocomplete="username" required></div>
+      <div class="f"><label for="pw">비밀번호</label><input id="pw" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit" style="width:100%">로그인</button>
+      <div class="err" id="login-err" role="alert"></div>
+    </form>
+  </section>
+
+  <section id="setup-view" class="login" hidden>
+    <h2>설정이 필요해요</h2>
+    <p>config.js에 Supabase 주소와 anon 키를 넣은 뒤 다시 배포하세요. README의 2단계를 참고하세요.</p>
+  </section>
+
+  <section id="app-view" hidden>
+    <div class="tabs" id="status-tabs" role="group" aria-label="상태"></div>
+    <div class="tools">
+      <div><label for="q">검색</label><input id="q" placeholder="보호자, 연락처, 강아지 이름"></div>
+      <div><label for="hosp">병원</label><select id="hosp"><option value="">전체 병원</option></select></div>
+      <div><label for="range">기간</label>
+        <select id="range"><option value="upcoming">오늘 이후</option><option value="all">전체</option><option value="past">지난 예약</option></select></div>
+      <div></div>
+    </div>
+    <p class="meta" id="meta" aria-live="polite"></p>
+    <div class="list" id="list"></div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var STATUSES = ["전체","대기","확정","취소","완료"];
+  var rows = [], state = {status:"대기", q:"", hosp:"", range:"upcoming"};
+
+  function toast(m){ var t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(function(){t.classList.remove("show")},2200); }
+  function show(view){ ["login-view","setup-view","app-view"].forEach(function(v){ $(v).hidden = v!==view; }); $("logout").hidden = $("refresh").hidden = view!=="app-view"; }
+  function today(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  var DAYS = ["일","월","화","수","목","금","토"];
+
+  if(!window.supabase || !window.SUPABASE_URL || /YOUR_/.test(window.SUPABASE_URL)){ show("setup-view"); return; }
+  var sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+  async function enter(){
+    var r = await sb.rpc("is_admin");
+    if(r.error || r.data !== true){
+      await sb.auth.signOut();
+      show("login-view");
+      $("login-err").textContent = "관리자로 등록되지 않은 계정이에요. schema.sql 6단계로 관리자를 등록하세요.";
+      return;
+    }
+    show("app-view");
+    await load();
+  }
+
+  async function load(){
+    $("meta").textContent = "불러오는 중…";
+    var r = await sb.from("bookings").select("*").order("visit_date",{ascending:true}).order("created_at",{ascending:true}).limit(1000);
+    if(r.error){ $("meta").textContent = "예약을 불러오지 못했어요: " + r.error.message; return; }
+    rows = r.data || [];
+    var names = Array.from(new Set(rows.map(function(x){return x.hospital_name}))).sort();
+    var sel = $("hosp"), cur = sel.value;
+    sel.innerHTML = '<option value="">전체 병원</option>';
+    names.forEach(function(n){ var o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o); });
+    sel.value = names.indexOf(cur)>-1 ? cur : "";
+    state.hosp = sel.value;
+    render();
+  }
+
+  function inRange(x){
+    var t = today();
+    if(state.range==="upcoming") return x.visit_date >= t;
+    if(state.range==="past") return x.visit_date < t;
+    return true;
+  }
+  function matches(x){
+    if(state.hosp && x.hospital_name!==state.hosp) return false;
+    if(!inRange(x)) return false;
+    var q = state.q.trim().toLowerCase();
+    if(q){
+      var hay = [x.owner_name,x.phone,x.dog_name,x.breed||"",x.memo||""].join(" ").toLowerCase();
+      if(hay.indexOf(q)===-1 && x.phone.replace(/[^0-9]/g,"").indexOf(q.replace(/[^0-9]/g,"")||"\u0000")===-1) return false;
+    }
+    return true;
+  }
+
+  function drawTabs(base){
+    var box=$("status-tabs"); box.innerHTML="";
+    STATUSES.forEach(function(s){
+      var n = s==="전체" ? base.length : base.filter(function(x){return x.status===s}).length;
+      var b=document.createElement("button"); b.type="button"; b.className="tab";
+      b.textContent = s+" "+n; b.setAttribute("aria-pressed", state.status===s?"true":"false");
+      b.addEventListener("click",function(){ state.status=s; render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function render(){
+    var base = rows.filter(matches);
+    drawTabs(base);
+    var shown = state.status==="전체" ? base : base.filter(function(x){return x.status===state.status});
+    $("meta").textContent = shown.length + "건 · 마지막 갱신 " + new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+    var list=$("list"); list.innerHTML="";
+    if(!shown.length){ var p=document.createElement("p"); p.className="empty"; p.textContent="조건에 맞는 예약이 없어요."; list.appendChild(p); return; }
+    shown.forEach(function(x){ list.appendChild(rowEl(x)); });
+  }
+
+  function el(tag, cls, text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+
+  function rowEl(x){
+    var row = el("article","row"+(x.visit_date<today()?" past":""));
+    var d = new Date(x.visit_date+"T00:00:00");
+    var c1 = el("div","when");
+    c1.appendChild(el("b",null, x.visit_date.slice(5).replace("-","/")+" ("+DAYS[d.getDay()]+")"));
+    c1.appendChild(el("span",null, x.time_slot));
+    c1.appendChild(document.createElement("br"));
+    c1.appendChild(el("span","small", "접수 "+new Date(x.created_at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})));
+
+    var c2 = el("div","who");
+    c2.appendChild(el("span","st st-"+x.status, x.status));
+    var h = el("div"); h.appendChild(el("b",null, x.owner_name+" · ")); 
+    var a = el("a",null,x.phone); a.href="tel:"+x.phone.replace(/[^0-9+]/g,""); h.appendChild(a);
+    c2.appendChild(h);
+    var dog = [x.dog_name, x.breed, x.age!=null?x.age+"살":null, x.weight!=null?x.weight+"kg":null].filter(Boolean).join(" / ");
+    c2.appendChild(el("div",null,"반려견: "+dog));
+    if(x.memo) c2.appendChild(el("div","memo small", x.memo));
+
+    var c3 = el("div");
+    c3.appendChild(el("b",null,x.hospital_name));
+    c3.appendChild(el("div","small","수정 "+new Date(x.updated_at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})));
+
+    var c4 = el("div","act");
+    var sel = el("select"); sel.setAttribute("aria-label","상태 변경");
+    ["대기","확정","취소","완료"].forEach(function(s){ var o=el("option",null,s); o.value=s; sel.appendChild(o); });
+    sel.value = x.status;
+    var note = el("textarea"); note.placeholder="관리자 메모 (병원 통화 내용, 확정 시간 등)"; note.value = x.admin_note||""; note.setAttribute("aria-label","관리자 메모");
+    var line = el("div","line");
+    var save = el("button","btn","저장"); save.type="button";
+    var del = el("button","btn ghost","삭제"); del.type="button";
+    line.appendChild(save); line.appendChild(del);
+    c4.appendChild(sel); c4.appendChild(note); c4.appendChild(line);
+
+    save.addEventListener("click", async function(){
+      save.disabled=true; save.textContent="저장 중…";
+      var r = await sb.from("bookings").update({status:sel.value, admin_note:note.value.trim()||null}).eq("id",x.id).select().single();
+      save.disabled=false; save.textContent="저장";
+      if(r.error){ toast("저장하지 못했어요: "+r.error.message); return; }
+      var i = rows.findIndex(function(y){return y.id===x.id}); rows[i]=r.data;
+      toast("저장했어요"); render();
+    });
+    del.addEventListener("click", async function(){
+      if(!confirm(x.owner_name+"님의 "+x.visit_date+" 예약을 삭제할까요? 되돌릴 수 없어요.")) return;
+      var r = await sb.from("bookings").delete().eq("id",x.id);
+      if(r.error){ toast("삭제하지 못했어요: "+r.error.message); return; }
+      rows = rows.filter(function(y){return y.id!==x.id}); toast("삭제했어요"); render();
+    });
+
+    row.appendChild(c1); row.appendChild(c2); row.appendChild(c3); row.appendChild(c4);
+    return row;
+  }
+
+  $("login-form").addEventListener("submit", async function(e){
+    e.preventDefault();
+    $("login-err").textContent="";
+    var btn=this.querySelector("button"); btn.disabled=true;
+    var r = await sb.auth.signInWithPassword({email:$("email").value.trim(), password:$("pw").value});
+    btn.disabled=false;
+    if(r.error){ $("login-err").textContent="이메일 또는 비밀번호가 맞지 않아요."; return; }
+    $("pw").value="";
+    enter();
+  });
+  $("logout").addEventListener("click", async function(){ await sb.auth.signOut(); rows=[]; show("login-view"); });
+  $("refresh").addEventListener("click", load);
+  $("q").addEventListener("input", function(){ state.q=this.value; render(); });
+  $("hosp").addEventListener("change", function(){ state.hosp=this.value; render(); });
+  $("range").addEventListener("change", function(){ state.range=this.value; render(); });
+
+  sb.auth.getSession().then(function(r){
+    if(r.data && r.data.session) enter(); else show("login-view");
+  });
+})();
+</script>
+</body>
+</html>
