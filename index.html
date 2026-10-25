@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>멍치과 · 강아지 치아 건강 가이드와 동물치과 예약</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#10302B; --muted:#4F6A64; --line:#CFE0DB;
+  --pine:#1F5E52; --pine-ink:#FFFFFF; --mist:#DDEBE7; --gum:#E4606D; --gum-soft:#FBE3E5;
+  --saffron:#F2B84B; --saffron-soft:#FDF1D6; --tooth:#FFFFFF; --tooth-edge:#9FB9B2; --warn:#B3261E;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1D1A; --surface:#15291F; --ink:#E6F2EE; --muted:#9DB8B1; --line:#274039;
+    --pine:#6FC2AF; --pine-ink:#0B1F1A; --mist:#1B3530; --gum:#F0808B; --gum-soft:#3A2327;
+    --saffron:#F2B84B; --saffron-soft:#3A3120; --tooth:#EAF3F0; --tooth-edge:#5E7C74; --warn:#FF9C94;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1D1A; --surface:#15291F; --ink:#E6F2EE; --muted:#9DB8B1; --line:#274039;
+  --pine:#6FC2AF; --pine-ink:#0B1F1A; --mist:#1B3530; --gum:#F0808B; --gum-soft:#3A2327;
+  --saffron:#F2B84B; --saffron-soft:#3A3120; --tooth:#EAF3F0; --tooth-edge:#5E7C74; --warn:#FF9C94;
+  color-scheme:dark;
+}
+html{height:auto;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.7;font-size:16px;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+h1,h2,h3{font-family:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400;line-height:1.25;margin:0;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--pine)}
+:focus-visible{outline:3px solid var(--saffron);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+section{padding:72px 0 0}
+.lead{color:var(--muted);max-width:60ch;margin-top:12px}
+h2{font-size:clamp(26px,4.4vw,38px)}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px}
+.brand{font-family:"Black Han Sans",sans-serif;font-size:20px;color:var(--ink);text-decoration:none}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav a{color:var(--ink);text-decoration:none;font-size:14px;padding:8px 10px;border-radius:8px;white-space:nowrap}
+nav a:hover{background:var(--mist)}
+
+/* hero */
+.hero{padding-top:48px}
+.hero h1{font-size:clamp(34px,7vw,64px);max-width:16ch}
+.hero .lead{font-size:18px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.btn{font:inherit;font-weight:600;border:2px solid var(--pine);background:var(--pine);color:var(--pine-ink);padding:12px 20px;border-radius:999px;cursor:pointer;text-decoration:none;display:inline-block;min-height:44px}
+.btn.ghost{background:transparent;color:var(--pine)}
+.btn:hover{filter:brightness(1.08)}
+.btn.small{padding:6px 14px;min-height:36px;font-size:14px}
+
+/* tooth chart */
+.chart{margin-top:40px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px}
+.chart-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.chart svg{width:100%;height:auto;display:block}
+.tooth{cursor:pointer;fill:var(--tooth);stroke:var(--tooth-edge);stroke-width:2;transition:fill .15s,transform .15s}
+.tooth:hover,.tooth.on{fill:var(--saffron-soft);stroke:var(--saffron)}
+.tooth.on{stroke-width:3.5}
+.tooth.carn{fill:var(--saffron-soft);stroke:var(--saffron)}
+.tooth.carn.on{fill:var(--saffron)}
+.gumband{fill:var(--gum)}
+.axis{fill:var(--muted);font-size:13px;font-family:"IBM Plex Sans KR",sans-serif}
+.info{background:var(--mist);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.info h3{font-size:22px}
+.info .count{font-weight:600;color:var(--pine)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* stages */
+.tabs{display:flex;gap:8px;margin-top:28px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 16px;cursor:pointer;min-height:44px}
+.tab[aria-selected="true"]{background:var(--gum);color:#fff;border-color:var(--gum)}
+.stage{margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px}
+.stage h3{font-size:24px}
+.meter{height:12px;border-radius:99px;background:var(--mist);overflow:hidden;margin:10px 0 6px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--saffron),var(--gum));transition:width .35s}
+.stage ul{margin:8px 0 0;padding-left:20px}
+.stage li{margin:4px 0}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--saffron-soft);color:var(--ink);margin-top:10px}
+
+/* check */
+.check{margin-top:28px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px}
+.sign{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.sign:last-child{border-bottom:0}
+.sign input{width:22px;height:22px;margin-top:3px;accent-color:var(--pine);flex:none}
+.result{border-radius:14px;padding:18px;background:var(--mist);height:100%}
+.result.go{background:var(--gum-soft)}
+.result.mid{background:var(--saffron-soft)}
+.result h3{font-size:22px;margin-bottom:8px}
+.fine{font-size:13px;color:var(--muted);margin-top:10px}
+
+/* home care */
+.care{margin-top:28px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:0}
+.steps li::before{content:counter(s);width:32px;height:32px;border-radius:50%;background:var(--pine);color:var(--pine-ink);display:grid;place-items:center;font-weight:600}
+.steps b{display:block}
+.dont h3,.do h3{font-size:20px;margin-bottom:8px}
+.dont li{margin:8px 0}
+.dont ul{padding-left:20px;margin:0}
+details{border-bottom:1px solid var(--line);padding:14px 0}
+details summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px;min-height:32px}
+details summary::after{content:"+";font-size:22px;line-height:1;color:var(--pine)}
+details[open] summary::after{content:"−"}
+details p{margin-top:8px;color:var(--muted)}
+
+/* hospitals */
+.hosp-list{margin-top:28px;display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+.hosp{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:20px;padding:22px 0;border-bottom:1px solid var(--line);align-items:start}
+.hosp h3{font-size:22px}
+.hosp .area{font-size:14px;color:var(--pine);font-weight:600;margin-bottom:2px}
+.hosp dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px}
+.hosp dt{color:var(--muted)}
+.hosp dd{margin:0}
+.hosp .acts{display:flex;flex-direction:column;gap:8px}
+.note{margin-top:16px;background:var(--saffron-soft);border-radius:12px;padding:14px 16px;font-size:14px}
+[hidden]{display:none!important}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.filters.second{margin-top:10px}
+.htags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.htag{font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--mist);color:var(--ink)}
+.htag.dent{background:var(--saffron-soft)}
+.htag.er{background:var(--gum-soft)}
+.htag.surg{background:var(--pine);color:var(--pine-ink)}
+.count-line{font-size:14px;color:var(--muted);margin-top:14px}
+
+/* booking */
+form{margin-top:28px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f.full{grid-column:1/-1}
+label,.lbl{font-weight:600;font-size:15px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;min-height:46px;width:100%}
+textarea{min-height:96px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--pine)}
+.err{color:var(--warn);font-size:14px;min-height:1.2em}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg label{font-weight:500;display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;min-height:46px}
+.seg input{width:18px;height:18px;min-height:0;accent-color:var(--pine)}
+.book-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:start}
+.summary pre{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font:inherit;background:var(--bg);border:1px dashed var(--tooth-edge);border-radius:12px;padding:14px;margin:12px 0}
+.hist{list-style:none;margin:12px 0 0;padding:0}
+.hist li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.hist li:last-child{border-bottom:0}
+.empty{color:var(--muted);font-size:14px;margin-top:8px}
+footer{margin-top:72px;padding:28px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:60;font-size:14px}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.hero-in{animation:rise .7s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+@media (max-width:820px){
+  section{padding-top:56px}
+  .chart-grid,.stage,.check,.care,.book-grid{grid-template-columns:1fr}
+  .hosp{grid-template-columns:1fr}
+  .hosp .acts{flex-direction:row;flex-wrap:wrap}
+  .fields{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">멍치과</a>
+    <nav aria-label="주요 메뉴">
+      <a href="#teeth">치아 구조</a>
+      <a href="#disease">구강 질환</a>
+      <a href="#check">자가 체크</a>
+      <a href="#care">홈케어</a>
+      <a href="#hospitals">병원 19곳</a>
+      <a href="#book">예약</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="wrap hero hero-in">
+  <h1>이빨 42개, 말은 못 해도 신호는 보내요</h1>
+  <p class="lead">강아지의 치아 구조와 구강 질환 단계, 집에서 하는 관리법을 정리했어요. 수도권 동물치과 병원을 비교하고 예약 신청서까지 한 번에 만들 수 있어요.</p>
+  <div class="cta">
+    <a class="btn" href="#hospitals">병원 찾고 예약하기</a>
+    <a class="btn ghost" href="#check">우리 아이 구강 체크</a>
+  </div>
+
+  <div class="chart" id="teeth" aria-labelledby="teeth-h">
+    <h2 id="teeth-h" style="font-size:24px;margin-bottom:4px">치아를 눌러서 알아보기</h2>
+    <p class="lead" style="margin:0 0 12px">성견 기준, 한쪽 턱만 그린 모식도예요. 좌우가 같아서 모두 합치면 위 20개, 아래 22개예요.</p>
+    <div class="chart-grid">
+      <svg id="svg" viewBox="0 0 640 300" role="group" aria-label="강아지 치아 모식도"></svg>
+      <div class="info" aria-live="polite">
+        <h3 id="i-title">치아를 선택해 보세요</h3>
+        <p class="count" id="i-count">종류별로 모양과 역할이 달라요.</p>
+        <p id="i-desc">노란색으로 표시된 이빨이 가장 크고 힘이 센 열육치예요. 부러지는 일이 제일 잦은 곳이기도 해요.</p>
+        <div class="chips" id="chips" role="group" aria-label="치아 종류 보기"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="disease"><div class="wrap">
+  <h2>치주질환은 4단계로 진행돼요</h2>
+  <p class="lead">잇몸 염증에서 시작해 치아를 잡아주는 뼈까지 녹아내려요. 초기에는 되돌릴 수 있지만 뼈가 사라지면 되돌릴 수 없어요.</p>
+  <div class="tabs" role="tablist" aria-label="치주질환 단계" id="stage-tabs"></div>
+  <div class="stage" id="stage-box" role="tabpanel"></div>
+  <p class="fine">단계 구분은 수의치과에서 쓰는 분류를 쉽게 풀어 쓴 거예요. 실제 단계는 구강 검사와 치과 X-ray로만 정확히 알 수 있어요.</p>
+</div></section>
+
+<section id="check"><div class="wrap">
+  <h2>우리 아이 구강 자가 체크</h2>
+  <p class="lead">해당하는 항목을 눌러 보세요. 진단이 아니라 병원에 갈 시점을 가늠하는 참고용이에요.</p>
+  <div class="check">
+    <div class="panel" id="signs"></div>
+    <div><div class="result" id="result" aria-live="polite"></div></div>
+  </div>
+</div></section>
+
+<section id="care"><div class="wrap">
+  <h2>집에서 하는 치아 관리</h2>
+  <p class="lead">가장 효과가 확실한 건 칫솔질이에요. 매일이 이상적이고, 어렵다면 일주일에 여러 번이라도 꾸준히 하는 게 좋아요.</p>
+  <div class="care">
+    <div class="panel do">
+      <h3>칫솔질 익히기, 2~4주 계획</h3>
+      <ol class="steps">
+        <li><div><b>입 주변 만지기</b>간식을 주면서 입술과 볼을 가볍게 만져요. 싫어하면 거기서 멈춰요.</div></li>
+        <li><div><b>치약 맛 보여주기</b>강아지 전용 치약을 손가락에 짜서 핥게 해요. 좋은 맛으로 기억되게 해요.</div></li>
+        <li><div><b>손가락이나 거즈로 문지르기</b>송곳니와 바깥쪽 어금니 잇몸 경계를 부드럽게 닦아요.</div></li>
+        <li><div><b>칫솔로 바꾸기</b>부드러운 칫솔을 45도로 기울여 잇몸선을 따라 작게 원을 그려요. 혀 쪽은 덜 닦아도 괜찮아요.</div></li>
+        <li><div><b>칭찬으로 마무리</b>끝나면 바로 칭찬과 보상을 줘요. 하루 1~2분이면 충분해요.</div></li>
+      </ol>
+    </div>
+    <div class="panel dont">
+      <h3>이건 피해 주세요</h3>
+      <ul>
+        <li><b>사람 치약:</b> 자일리톨은 강아지에게 위험하고, 삼킨 불소도 좋지 않아요. 꼭 강아지 전용을 써요.</li>
+        <li><b>딱딱한 뼈·뿔·발굽·돌 같은 장난감:</b> 손톱으로 눌러서 자국이 안 남을 만큼 단단하면 이빨이 부러질 수 있어요.</li>
+        <li><b>마취 없는 스케일링만 믿기:</b> 잇몸 아래 치석은 마취 없이 제거하기 어려워서 수의치과 쪽에서는 권하지 않는 편이에요.</li>
+        <li><b>입냄새를 노화로 넘기기:</b> 입냄새는 잇몸병이 보내는 대표 신호예요.</li>
+      </ul>
+      <p class="fine">치과 스케일링은 전신마취로 해요. 나이가 많거나 지병이 있다면 마취 전 검사로 안전성을 먼저 확인해요.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:48px;font-size:24px">치아 밖의 건강관리</h3>
+  <div style="margin-top:8px;max-width:760px">
+    <details open><summary>정기검진은 얼마나 자주?</summary><p>건강한 성견은 1년에 한 번, 노령견(대략 7세 이상)과 소형견은 6개월에 한 번 구강검진을 포함한 종합검진을 권하는 병원이 많아요. 소형견은 치아가 촘촘해서 치석이 더 빨리 쌓여요.</p></details>
+    <details><summary>예방접종과 구충</summary><p>종합백신, 광견병, 켄넬코프 접종과 매달 심장사상충 예방, 외부·내부 기생충 예방이 기본이에요. 접종 시기와 횟수는 나이와 생활 환경에 따라 다르니 주치 수의사와 일정을 짜세요.</p></details>
+    <details><summary>유치와 영구치 갈이</summary><p>생후 3~6개월 사이 젖니(28개)가 빠지고 영구치(42개)가 나요. 영구치가 났는데 젖니가 그대로 남아 있으면 치열이 틀어질 수 있어서 빨리 병원에서 확인하는 게 좋아요.</p></details>
+    <details><summary>사료와 체중</summary><p>비만은 관절과 심장, 마취 위험까지 높여요. 간식은 하루 섭취량의 10% 안쪽으로 줄이고, 치아 관리용 제품은 수의구강학회 인증(VOHC) 표시가 있는지 확인해 보세요.</p></details>
+  </div>
+</div></section>
+
+<section id="hospitals"><div class="wrap">
+  <h2>수도권 동물병원</h2>
+  <p class="lead">서울 강남·관악·마포·중구·성동·양천과 경기 안양·의왕·과천·수원의 병원이에요. 병원 공식 사이트, 지자체 동물병원 현황, 언론 인터뷰 등 공개된 정보로 확인했어요. 진료 시간과 치과 진료 여부는 바뀔 수 있으니 방문 전에 꼭 전화로 확인하세요.</p>
+  <div class="filters" id="region-filters" role="group" aria-label="지역 선택"></div>
+  <div class="filters second" id="type-filters" role="group" aria-label="병원 종류"></div>
+  <p class="count-line" id="hosp-count" aria-live="polite"></p>
+  <div class="hosp-list" id="hosp-list"></div>
+  <p class="note">순위나 광고가 아니고, 병원별 진료 수준을 평가하지도 않았어요. 수술 특화 표시는 병원이 외과·정형외과 수술센터를 따로 운영한다고 안내한 곳에 붙였어요. 친절함은 공개 정보로 확인할 수 없으니 상담 전화나 실제 이용 후기로 판단해 보세요. 치과 특화 표시는 병원이 스스로 치과 진료나 치과 장비를 안내한 경우에 붙였어요. 전화번호를 확인하지 못한 곳은 공식 사이트에서 확인해 주세요.</p>
+</div></section>
+
+<section id="book"><div class="wrap">
+  <h2>예약 신청</h2>
+  <p class="lead">신청하면 운영자가 병원과 일정을 확인한 뒤 입력하신 연락처로 확정 연락을 드려요. 급한 진료는 병원에 바로 전화해 주세요.</p>
+  <div class="book-grid">
+    <form id="form" class="panel" novalidate>
+      <div class="fields">
+        <div class="f full"><label for="hospital">병원</label>
+          <select id="hospital" required></select><div class="err" id="e-hospital"></div></div>
+        <div class="f"><label for="owner">보호자 이름</label><input id="owner" autocomplete="name" required><div class="err" id="e-owner"></div></div>
+        <div class="f"><label for="phone">연락처</label><input id="phone" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required><div class="err" id="e-phone"></div></div>
+        <div class="f"><label for="dog">강아지 이름</label><input id="dog" required><div class="err" id="e-dog"></div></div>
+        <div class="f"><label for="breed">견종</label><input id="breed" placeholder="예: 말티즈"></div>
+        <div class="f"><label for="age">나이(살)</label><input id="age" type="number" min="0" max="30" step="0.5" inputmode="decimal"></div>
+        <div class="f"><label for="weight">체중(kg)</label><input id="weight" type="number" min="0.5" max="100" step="0.1" inputmode="decimal"></div>
+        <div class="f"><label for="date">희망 날짜</label><input id="date" type="date" required><div class="err" id="e-date"></div></div>
+        <div class="f"><span class="lbl" id="t-lbl">희망 시간대</span>
+          <div class="seg" role="radiogroup" aria-labelledby="t-lbl">
+            <label><input type="radio" name="slot" value="오전" checked>오전</label>
+            <label><input type="radio" name="slot" value="오후">오후</label>
+            <label><input type="radio" name="slot" value="상관없음">상관없음</label>
+          </div></div>
+        <div class="f full"><label for="memo">진료 목적과 증상</label>
+          <textarea id="memo" placeholder="예: 스케일링 상담, 왼쪽 위 어금니 쪽 입냄새와 잇몸 출혈"></textarea></div>
+      </div>
+      <div class="f full" style="margin-top:16px">
+        <label class="sign" style="border:0;padding:0"><input type="checkbox" id="consent"><span style="font-weight:500">예약 확인을 위해 보호자 이름·연락처·반려견 정보를 수집하고, 진료일로부터 6개월 뒤 삭제하는 데 동의해요.</span></label>
+        <div class="err" id="e-consent"></div>
+      </div>
+      <div class="cta"><button class="btn" type="submit">예약 신청하기</button></div>
+      <div class="err" id="e-send" role="alert"></div>
+    </form>
+
+    <div>
+      <div class="panel summary" id="summary" hidden>
+        <h3 style="font-size:20px">예약 신청이 접수됐어요</h3>
+        <pre id="sum-text"></pre>
+        <div class="cta" style="margin-top:0">
+          <a class="btn small" id="call" href="#">병원에 전화하기</a>
+          <button class="btn small ghost" id="copy" type="button">내용 복사</button>
+        </div>
+        <p class="fine" id="sum-warn"></p>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <h3 style="font-size:20px">이 기기에서 보낸 신청</h3>
+        <p class="fine" style="margin-top:4px">이 기기의 브라우저에만 저장돼요.</p>
+        <ul class="hist" id="hist"></ul>
+        <p class="empty" id="hist-empty">아직 만든 신청서가 없어요.</p>
+      </div>
+    </div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  이 페이지는 일반적인 정보 제공용이며 수의사의 진료를 대신하지 않습니다. 응급 증상(얼굴 부기, 고름, 먹지 못함, 심한 출혈)은 가까운 동물병원에 바로 연락하세요.
+</div></footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+try{
+  if(window.supabase && window.SUPABASE_URL && !/YOUR_/.test(window.SUPABASE_URL)){
+    window.sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {auth:{persistSession:false}});
+  }
+}catch(e){}
+</script>
+<script>
+(function(){
+  /* ---------- 치아 모식도 ---------- */
+  var S = 1.9;
+  var TYPES = {
+    I:{name:"앞니(절치)", desc:"먹이를 물어 떼고 털 속 이물질을 정리하는 작은 이빨이에요. 위아래 각각 6개로, 한쪽에 3개씩 있어요.", n:"위 6개 · 아래 6개"},
+    C:{name:"송곳니(견치)", desc:"가장 길고 뿌리가 깊어요. 물건을 단단히 물고 잡는 데 써요. 뿌리가 턱뼈 속으로 길게 들어가서, 부러지면 신경치료가 필요한 경우가 많아요.", n:"위 2개 · 아래 2개"},
+    P:{name:"작은어금니(전구치)", desc:"뾰족한 봉우리가 있어 먹이를 자르고 찢어요. 위아래 각각 8개, 한쪽에 4개씩 있어요.", n:"위 8개 · 아래 8개"},
+    R:{name:"열육치", desc:"위턱 맨 뒤 작은어금니(제4전구치)와 아래턱 첫째 큰어금니가 맞물려 가위처럼 고기와 뼈를 잘라요. 가장 크고 힘을 많이 받아서 딱딱한 걸 씹다 부러지는 일이 잦아요.", n:"위 2개 · 아래 2개"},
+    M:{name:"큰어금니(구치)", desc:"넓고 평평해서 음식을 으깨고 갈아요. 위턱은 한쪽 2개, 아래턱은 한쪽 3개라서 아래가 더 많아요.", n:"위 4개 · 아래 6개"}
+  };
+  var UP = ["I","I","I","C","P","P","P","R","M","M"];
+  var LO = ["I","I","I","C","P","P","P","P","R","M","M"];
+  // 위: 열육치는 P4, 아래: 열육치는 M1(아홉번째)
+  var LO_FIX = ["I","I","I","C","P","P","P","P","R","M","M"];
+  var SIZE = {I:[18,26],C:[24,52],P:[24,30],R:[48,42],M:[32,26]};
+  var svg = document.getElementById("svg");
+  var NS = "http://www.w3.org/2000/svg";
+  var teeth = [];
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e}
+
+  function drawRow(list, upper){
+    var gumY = upper ? 62 : 238;
+    var band = el("rect",{x:14,y:upper?34:gumY,width:612,height:28,rx:14,"class":"gumband"});
+    svg.appendChild(band);
+    var x = 44;
+    list.forEach(function(t,i){
+      var w = SIZE[t][0]*S/1.25, h = SIZE[t][1]*S/1.25;
+      var g = el("g",{tabindex:0,role:"button","aria-label":(upper?"위턱 ":"아래턱 ")+TYPES[t].name});
+      var shape;
+      if(t==="C"){
+        var d = upper
+          ? "M"+x+","+gumY+" Q"+(x+w/2)+","+(gumY+h*1.25)+" "+(x+w*0.55)+","+(gumY+h)+" Q"+(x+w)+","+(gumY+h*0.2)+" "+(x+w)+","+gumY+" Z"
+          : "M"+x+","+gumY+" Q"+(x+w/2)+","+(gumY-h*1.25)+" "+(x+w*0.55)+","+(gumY-h)+" Q"+(x+w)+","+(gumY-h*0.2)+" "+(x+w)+","+gumY+" Z";
+        shape = el("path",{d:d});
+      } else if(t==="P"||t==="R"){
+        var d2 = upper
+          ? "M"+x+","+gumY+" L"+x+","+(gumY+h*0.7)+" L"+(x+w*0.3)+","+(gumY+h)+" L"+(x+w*0.55)+","+(gumY+h*0.72)+" L"+(x+w*0.8)+","+(gumY+h)+" L"+(x+w)+","+(gumY+h*0.7)+" L"+(x+w)+","+gumY+" Z"
+          : "M"+x+","+gumY+" L"+x+","+(gumY-h*0.7)+" L"+(x+w*0.3)+","+(gumY-h)+" L"+(x+w*0.55)+","+(gumY-h*0.72)+" L"+(x+w*0.8)+","+(gumY-h)+" L"+(x+w)+","+(gumY-h*0.7)+" L"+(x+w)+","+gumY+" Z";
+        shape = el("path",{d:d2,"stroke-linejoin":"round"});
+      } else {
+        shape = el("rect",{x:x,y:upper?gumY:gumY-h,width:w,height:h,rx:t==="I"?7:9});
+      }
+      shape.setAttribute("class","tooth"+(t==="R"?" carn":""));
+      g.appendChild(shape);
+      g.addEventListener("click",function(){pick(t,g)});
+      g.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(t,g)}});
+      svg.appendChild(g);
+      teeth.push({t:t,g:g,shape:shape});
+      x += w + 7;
+    });
+  }
+  drawRow(UP,true);
+  drawRow(LO_FIX,false);
+  var a1 = el("text",{x:16,y:152,"class":"axis"}); a1.textContent="앞";
+  var a2 = el("text",{x:596,y:152,"class":"axis"}); a2.textContent="뒤";
+  var mid = el("text",{x:230,y:152,"class":"axis"}); mid.textContent="위턱 ▲ · ▼ 아래턱";
+  svg.appendChild(a1); svg.appendChild(a2); svg.appendChild(mid);
+
+  var chips = document.getElementById("chips");
+  var currentType = null;
+  function pick(t){
+    currentType = t;
+    var d = TYPES[t];
+    document.getElementById("i-title").textContent = d.name;
+    document.getElementById("i-count").textContent = "전체 " + d.n;
+    document.getElementById("i-desc").textContent = d.desc;
+    teeth.forEach(function(o){o.shape.classList.toggle("on", o.t===t)});
+    Array.prototype.forEach.call(chips.children,function(c){c.setAttribute("aria-pressed", c.dataset.t===t?"true":"false")});
+  }
+  ["I","C","P","R","M"].forEach(function(t){
+    var b = document.createElement("button");
+    b.className="chip"; b.type="button"; b.dataset.t=t; b.textContent=TYPES[t].name.split("(")[0];
+    b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",function(){pick(t)});
+    chips.appendChild(b);
+  });
+
+  /* ---------- 치주질환 단계 ---------- */
+  var STAGES = [
+    {t:"1단계 · 치은염", p:20, d:"잇몸에만 염증이 있고 치아를 잡는 뼈는 아직 괜찮아요.", s:["잇몸 가장자리가 붉고 살짝 부어요","양치할 때 피가 날 수 있어요","치석이 조금 보이고 입냄새가 시작돼요"], a:"전문 스케일링과 꾸준한 칫솔질로 완전히 회복될 수 있어요.", tag:"되돌릴 수 있는 단계"},
+    {t:"2단계 · 초기 치주염", p:40, d:"염증이 잇몸 아래로 내려가 뼈가 녹기 시작해요. 소실은 25% 미만이에요.", s:["잇몸이 내려앉기 시작해요","치아 사이에 음식이 잘 끼어요","입냄새가 눈에 띄어요"], a:"잇몸 아래까지 하는 스케일링과 치과 X-ray 확인이 필요해요.", tag:"진행을 멈출 수 있는 단계"},
+    {t:"3단계 · 중등도 치주염", p:70, d:"뼈 소실이 25~50% 정도예요. 치아가 흔들릴 수 있어요.", s:["잇몸에서 피나 고름이 나와요","치아가 흔들리거나 뿌리가 드러나요","씹을 때 아파서 한쪽으로만 씹어요"], a:"치주치료로 살릴지 발치할지 치아별로 판단해요.", tag:"치료 계획이 필요한 단계"},
+    {t:"4단계 · 진행성 치주염", p:100, d:"뼈 소실이 50% 이상으로, 치아 상당수를 잃을 수 있어요.", s:["농양으로 얼굴이나 눈 밑이 부을 수 있어요","치아가 많이 흔들려요","식욕이 떨어지고 턱뼈가 약해질 수 있어요"], a:"발치를 포함한 치료가 필요하고, 염증이 몸 전체에 영향을 줄 수 있어 빠른 진료가 좋아요.", tag:"빠른 진료가 필요한 단계"}
+  ];
+  var tabs = document.getElementById("stage-tabs"), box = document.getElementById("stage-box");
+  function showStage(i){
+    var s = STAGES[i];
+    Array.prototype.forEach.call(tabs.children,function(b,j){b.setAttribute("aria-selected", j===i?"true":"false")});
+    box.innerHTML = '<div><h3></h3><p class="stg-d" style="margin-top:6px"></p><div class="meter" aria-hidden="true"><i></i></div><span class="fine">잇몸병 진행 정도</span><br><span class="tag"></span></div><div><b>이런 모습이 보여요</b><ul></ul><p style="margin-top:14px"><b>필요한 조치</b><br><span class="stg-a"></span></p></div>';
+    box.querySelector("h3").textContent = s.t;
+    box.querySelector(".stg-d").textContent = s.d;
+    box.querySelector(".tag").textContent = s.tag;
+    box.querySelector(".stg-a").textContent = s.a;
+    var ul = box.querySelector("ul");
+    s.s.forEach(function(x){var li=document.createElement("li");li.textContent=x;ul.appendChild(li)});
+    requestAnimationFrame(function(){box.querySelector(".meter i").style.width = s.p+"%"});
+  }
+  STAGES.forEach(function(s,i){
+    var b=document.createElement("button");b.className="tab";b.type="button";b.setAttribute("role","tab");
+    b.textContent = s.t.split(" · ")[0];
+    b.addEventListener("click",function(){showStage(i)});
+    tabs.appendChild(b);
+  });
+  showStage(0);
+
+  /* ---------- 자가 체크 ---------- */
+  var SIGNS = [
+    {t:"입냄새가 심하거나 점점 심해져요", w:1},
+    {t:"이빨에 누런색·갈색 치석이 보여요", w:1},
+    {t:"잇몸이 빨갛게 붓거나 피가 나요", w:2},
+    {t:"침을 많이 흘리거나 발로 입을 자꾸 비벼요", w:2},
+    {t:"한쪽으로만 씹거나 사료를 흘리고 딱딱한 걸 피해요", w:2},
+    {t:"흔들리거나 부러진 이빨이 있어요", w:2},
+    {t:"식욕이 줄었거나 입 만지는 걸 갑자기 싫어해요", w:2},
+    {t:"얼굴·눈 밑이 붓거나 잇몸에서 고름이 보여요", w:4, urgent:true}
+  ];
+  var signsBox = document.getElementById("signs"), result = document.getElementById("result");
+  SIGNS.forEach(function(s,i){
+    var l=document.createElement("label");l.className="sign";
+    var c=document.createElement("input");c.type="checkbox";c.dataset.i=i;
+    var sp=document.createElement("span");sp.textContent=s.t;
+    l.appendChild(c);l.appendChild(sp);signsBox.appendChild(l);
+    c.addEventListener("change",calc);
+  });
+  function calc(){
+    var score=0, urgent=false, n=0;
+    Array.prototype.forEach.call(signsBox.querySelectorAll("input"),function(c){
+      if(c.checked){var s=SIGNS[c.dataset.i];score+=s.w;n++;if(s.urgent)urgent=true}
+    });
+    var h,p,cls="";
+    if(urgent){cls="go";h="가능한 한 빨리 진료받으세요";p="염증이 깊어졌을 수 있는 신호예요. 며칠 기다리기보다 오늘이나 내일 중 병원에 연락해 보세요."}
+    else if(score>=5){cls="go";h="이번 주 안에 구강검진을 권해요";p="여러 신호가 겹쳐 있어요. 스케일링이나 치과 X-ray가 필요한 상태일 수 있어요."}
+    else if(score>=2){cls="mid";h="한 달 안에 구강검진을 받아 보세요";p="초기 잇몸병일 가능성이 있어요. 검진과 함께 칫솔질 방법도 상담해 보세요."}
+    else if(score===1){cls="mid";h="지켜보면서 홈케어를 시작해요";p="아직 가벼운 신호예요. 칫솔질을 시작하고 다음 정기검진에서 꼭 확인해 보세요."}
+    else{h="지금은 양호해 보여요";p="체크한 항목이 없어요. 정기 구강검진과 홈케어를 이어가세요. 눈에 안 보이는 뿌리 쪽 문제는 검진으로만 알 수 있어요."}
+    result.className="result "+cls;
+    result.innerHTML="";
+    var h3=document.createElement("h3");h3.textContent=h;
+    var pp=document.createElement("p");pp.textContent=p;
+    var f=document.createElement("p");f.className="fine";f.textContent="체크한 항목 "+n+"개 · 참고용 결과이며 진단이 아니에요.";
+    result.appendChild(h3);result.appendChild(pp);
+    var a=document.createElement("a");a.className="btn small";a.href="#hospitals";a.textContent="병원 보러 가기";a.style.marginTop="12px";
+    if(score>0||urgent)result.appendChild(a);
+    result.appendChild(f);
+  }
+  calc();
+
+  /* ---------- 병원 ---------- */
+  var HOSPITALS = [
+    {id:"careden", region:"서울 강남", spot:"신사동", name:"케어덴 동물치과&내과병원", addr:"서울 강남구 언주로 813, 3층", tel:"02-540-7522",
+     hours:"화~토 09:30~18:30 (일·월·공휴일 휴진)", closed:[0,1], url:"http://careden.kr/", dent:true,
+     feat:"치과의사 면허를 함께 가진 수의사와 내과 전공 마취 전담 수의사가 협진해요. 치과 전용 CT와 호흡마취 장비를 갖추고, 신경치료·크라운·뼈이식 등 중증 치과 치료와 종합검진을 함께 해요."},
+    {id:"redental", region:"서울 강남", spot:"삼성동", name:"청담리덴동물치과병원", addr:"서울 강남구 영동대로128길 15, 아크로 삼성 상가 102호", tel:"02-544-2882",
+     hours:"병원에 문의", closed:[], url:"http://www.redental.co.kr/m/", dent:true,
+     feat:"수의사·치과의사 복수면허 원장이 진료하고 서울대 마취통증의학 전공 수의사가 상주한다고 안내하고 있어요. 스케일링부터 치주·신경·보철·교정·구강종양까지 다뤄요. 삼성동으로 이전한 주소를 기준으로 했어요."},
+    {id:"snu", region:"서울 관악", spot:"서울대 수의과대학", name:"서울대학교 동물병원", addr:"서울 관악구 관악로 1, 서울대학교 수의과대학", tel:"02-880-8661",
+     hours:"09:00~18:00, 모든 진료 사전예약제", closed:[0,6], url:"https://vmth.snu.ac.kr/treat/consultationTime.do", uni:true,
+     feat:"수의과대학 부속 대학병원이에요. 치과·안과 등 전문 진료과 교수진이 있는 곳으로 알려져 있어요. 진료의뢰 상담과 접수는 02-880-8661~6번이에요. 주말 진료 여부와 치과 일정은 전화로 확인하세요."},
+    {id:"western", region:"서울 마포", spot:"신촌·노고산동", name:"웨스턴 동물의료센터", addr:"서울 마포구 신촌로 110, 웨스턴5빌딩", tel:"02-701-7580",
+     hours:"24시간 연중무휴", closed:[], url:"", er:true, dent:true,
+     feat:"24시간 운영하는 마포구 대형 동물병원으로, 병원 정보 서비스에 암·종양, 심장, 안과, 치과, 정형외과 특화 진료가 안내되어 있어요. 야간이나 주말에 급히 진료가 필요할 때 참고하세요."},
+    {id:"nuri", region:"서울 마포", spot:"신촌로·아현동", name:"동물병원 누리에뜰", addr:"서울 마포구 신촌로 248", tel:"",
+     hours:"평일 10:00~19:00, 토 10:00~17:00 (점심 13~14시, 수·일·공휴일 휴진)", closed:[0,3], url:"http://nurietteul.co.kr/", dent:true,
+     feat:"치과 진료를 특화 진료로 안내하는 곳이에요. 치석과 잇몸 염증, 잇몸 퇴축 정도를 평가하고 치과 전용 X-ray로 뿌리와 신경 상태를 확인한 뒤 스케일링과 발치를 진행해요. 종합건강검진과 노령견 진료도 해요."},
+    {id:"atescotes", region:"서울 마포", spot:"이대역·대흥동", name:"아떼꼬떼 동물병원", addr:"서울 마포구 대흥로 183, 마포그랑자이 2상가 2층 201호", tel:"",
+     hours:"병원에 문의", closed:[], url:"https://atescotes.co.kr/Blog/?bmode=view&idx=166203726", dent:true,
+     feat:"단순 스케일링을 넘어 치주염 관리, 신경치료, 보철치료까지 한다고 안내해요. 치과 방사선 촬영으로 치아 하나하나 살리는 방향을 찾고, CT·MRI나 24시간 입원이 필요하면 상위 병원과 연계해요. 2호선 이대역 6번 출구 가까이에 있어요."},
+    {id:"bon-ay", region:"경기 안양", spot:"관양동·평촌", name:"본동물의료센터 안양점", addr:"경기 안양시 동안구 시민대로 370 (관양동)", tel:"031-396-8275",
+     hours:"외래 월~토·공휴일 09:30~20:00, 그 외 24시간 응급", closed:[], url:"https://bonamc.co.kr/introduction/guidance/anyang/", er:true, dent:true, surg:true,
+     feat:"동네 병원에서 의뢰받는 2차 동물의료기관이에요. 과별로 나눠 진료하고 안과·치과 과장이 따로 있어요. 노령견과 난치성 질환을 많이 보고, 명절 당일에는 응급진료만 해요."},
+    {id:"nel", region:"경기 안양", spot:"평촌역", name:"넬동물의료센터", addr:"경기 안양시 동안구 시민대로 312, 평촌칼라힐주차빌딩 2층", tel:"031-422-7579",
+     hours:"24시간 운영 (외래 시간은 문의)", closed:[], url:"https://www.nelamc.com/", er:true, surg:true,
+     feat:"평촌역 3번 출구 근처의 24시 병원이에요. 내과·심장·신경외과·건강검진·영상진단과 슬개골·십자인대·디스크 등 외과 특화 센터를 함께 운영해요. 치과 진료 범위는 전화로 확인하세요."},
+    {id:"uiwang", region:"경기 의왕", spot:"오전동", name:"의왕동물병원", addr:"경기 의왕시 경수대로 372, 진양빌딩", tel:"031-454-7582",
+     hours:"09:30~20:00 (매월 첫째·셋째 일요일 휴진)", closed:[], url:"",
+     feat:"서울대 임상동물병원이라고 소개하는 곳으로 피부질환, 내과, 외과수술, 고양이 진료를 주로 안내해요. 기본 구강검진과 스케일링 가능 여부는 전화로 확인하세요."},
+    {id:"laforet", region:"경기 의왕", spot:"삼동·부곡", name:"라포레동물메디컬센터", addr:"경기 의왕시 부곡중앙로 3-3 (삼동)", tel:"031-360-7588",
+     hours:"병원에 문의", closed:[], url:"",
+     feat:"의왕시 동물병원 현황에 등록된 메디컬센터예요. 의왕역·부곡 쪽에서 가까워요. 진료 과목과 치과 진료 여부는 공개 정보로 확인하지 못해서 전화 문의가 필요해요."},
+    {id:"abc", region:"경기 과천", spot:"별양동·정부과천청사역", name:"ABC동물의료센터", addr:"경기 과천시 별양상가3로 14, e편한세상 시티 과천 112~114호", tel:"",
+     hours:"병원에 문의", closed:[], url:"https://abcamc.co.kr/", dent:true,
+     feat:"수의학박사 의료진이 내과·외과·신경외과·안과·재활과 함께 치과 클리닉을 운영해요. 슬개골 진료와 건강검진 장비를 강점으로 안내하고, 정부과천청사역 근처라 주차가 편하다고 해요."},
+    {id:"ygra", region:"경기 과천", spot:"인덕원역 인근", name:"여기로양한방동물병원", addr:"경기 과천시 과천대로2길 6, 과천 테라스 원 3층", tel:"",
+     hours:"병원에 문의", closed:[], url:"https://ygramc.com/", dent:true,
+     feat:"외과 대학원 출신 의료진이 내과·외과·치과·한방재활을 함께 진료해요. 구강 X-ray를 바탕으로 치과 진료를 한다고 안내해요. 노령견이나 관절이 약한 아이라면 재활 상담도 같이 받아볼 수 있어요."},
+    {id:"bon-sw", region:"경기 수원", spot:"장안구 송죽동", name:"본동물의료센터 수원점", addr:"경기 수원시 장안구 경수대로 937 (송죽동)", tel:"031-248-8275",
+     hours:"평일 외래, 주말 예약진료, 그 외 24시간 응급 (외래 시간은 전화 확인)", closed:[], url:"https://bonamc.co.kr/introduction/guidance/suwon/", er:true, surg:true,
+     feat:"본동물의료센터의 수원 본점이에요. 과별 분과 진료와 MRI·CT 촬영을 하는 2차 병원이고, 고양이 전문 진료 공간과 대형견 대기실을 따로 두고 있어요."},
+    {id:"root", region:"경기 수원", spot:"팔달구·매교역", name:"뿌리동물병원", addr:"경기 수원시 팔달구 세지로 178, 1~3층", tel:"",
+     hours:"병원에 문의", closed:[], url:"https://rootanimalclinic.co.kr/", dent:true,
+     feat:"동물치과를 전문으로 내세우는 병원이에요. 보호자가 참관할 수 있는 수술방과 고양이 전용 대기실이 있고, 영상 전공 수의사가 판독해요. 매교역 8번 출구에서 걸어서 10분 정도이고 건물 앞 주차가 돼요."},
+    {id:"kj", region:"경기 수원", spot:"영통구·망포역", name:"권앤정 동물외과병원·24시 수원동물메디컬센터", addr:"경기 수원시 영통구 덕영대로 1509 (기업정보 기준, 방문 전 확인)", tel:"",
+     hours:"24시 운영 (외래 시간은 문의)", closed:[], url:"https://suwonamc.co.kr/surgery", er:true, surg:true,
+     feat:"서울대 동물병원 출신 외과 원장단이 진료하는 고난도 수술 전문 센터예요. 정형외과(슬개골 탈구, 십자인대, 골절), 신경외과(디스크, 환축추 불안정), 종양·소화기·간담낭·비뇨생식기 외과를 나눠 진료하고, 국제수의정형학회 교육을 이수한 의료진이 있다고 안내해요."},
+    {id:"barun", region:"경기 수원", spot:"권선구 호매실", name:"수원 24시 바른동물의료센터", addr:"경기 수원시 권선구 금곡로 213, 딜라이트타워 2층", tel:"031-291-2475",
+     hours:"24시간 연중무휴", closed:[], url:"http://www.24barunamc.co.kr/", er:true,
+     feat:"수의사와 테크니션이 24시간 상주하고 중환자실과 의료산소 설비를 갖췄어요. 서울대 동물병원 등에서 수련한 내과·외과 수의사들이 협진해요. 치과 진료 범위는 전화로 확인하세요."},
+    {id:"sdamc", region:"서울 중구", spot:"왕십리로", name:"SD동물의료센터 서울점", addr:"서울 중구 왕십리로 407, 상가 2층", tel:"02-2039-0303",
+     hours:"365일 24시간 (점심 13:00~14:00)", closed:[], url:"https://sdamc.co.kr/Info", er:true, surg:true,
+     feat:"외과수술센터를 따로 운영하는 24시 2차 동물의료센터예요. 정형외과·신경외과·심혈관수술·종양외과를 보는 원장단이 있고, 64채널 CT와 1.5T MRI로 슬개골 탈구, 십자인대 파열, 복합골절, 디스크 수술을 해요. 혈액투석과 한방재활도 함께해요."},
+    {id:"worldpet", region:"서울 양천", spot:"신월동", name:"24시 월드펫동물메디컬센터", addr:"서울 양천구 신월로 208 (신월동)", tel:"02-2698-7582",
+     hours:"연중무휴 24시 (야간 응급 21:00~10:00)", closed:[], url:"https://24worldpet.com/", er:true, surg:true,
+     feat:"1997년부터 진료해 온 병원으로 슬개골 정형외과 수술센터, 간담도췌장 수술센터, 종합수술센터를 운영해요. 심화외과를 맡는 원장들이 있고, 같은 건물의 영상센터에서 MRI·CT 검사 후 바로 수술로 이어져요. 고양이·특수동물 진료도 해요."},
+    {id:"central", region:"서울 성동", spot:"행당동·왕십리역", name:"24시센트럴동물메디컬센터", addr:"서울 성동구 행당동 (왕십리역 10번 출구 도보 5분, 무학여고 사거리)", tel:"02-3395-7974",
+     hours:"일반 09:00~19:00, 야간 19:00~09:00 (야간 추가 진료비)", closed:[], url:"http://cenamc.kr/", er:true, surg:true,
+     feat:"외과수술센터를 내세우는 24시 병원이에요. 슬개골 탈구, 십자인대 파열, 디스크 수술과 재활·한방 치료를 하고, 고양이 치과 장비도 갖추고 있어요. 상담 전화는 02-3395-7974, 7975번이에요."}
+  ];
+  var REGIONS = ["전체","서울 강남","서울 관악","서울 마포","서울 중구","서울 성동","서울 양천","경기 안양","경기 의왕","경기 과천","경기 수원"];
+  var list = document.getElementById("hosp-list"), sel = document.getElementById("hospital");
+  var rf = document.getElementById("region-filters"), tf = document.getElementById("type-filters"), cnt = document.getElementById("hosp-count");
+  var fstate = {region:"전체", dent:false, er:false, surg:false};
+  var ph = document.createElement("option");ph.value="";ph.textContent="병원을 선택하세요";sel.appendChild(ph);
+  REGIONS.slice(1).forEach(function(r){
+    var og=document.createElement("optgroup");og.label=r;
+    HOSPITALS.filter(function(h){return h.region===r}).forEach(function(h){
+      var o=document.createElement("option");o.value=h.id;o.textContent=h.name;og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  function chip(label,on,fn){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=label;b.setAttribute("aria-pressed",on?"true":"false");b.addEventListener("click",fn);return b}
+  function drawFilters(){
+    rf.innerHTML="";tf.innerHTML="";
+    REGIONS.forEach(function(r){
+      var n = r==="전체" ? HOSPITALS.length : HOSPITALS.filter(function(h){return h.region===r}).length;
+      rf.appendChild(chip(r+" "+n, fstate.region===r, function(){fstate.region=r;drawFilters();renderHosp()}));
+    });
+    tf.appendChild(chip("치과 특화만", fstate.dent, function(){fstate.dent=!fstate.dent;drawFilters();renderHosp()}));
+    tf.appendChild(chip("24시 응급만", fstate.er, function(){fstate.er=!fstate.er;drawFilters();renderHosp()}));
+    tf.appendChild(chip("수술 특화만", fstate.surg, function(){fstate.surg=!fstate.surg;drawFilters();renderHosp()}));
+  }
+  function buildRow(h){
+    var row=document.createElement("article");row.className="hosp";
+    var c1=document.createElement("div");
+    c1.innerHTML='<div class="area"></div><h3></h3><div class="htags"></div><p style="margin-top:8px;color:var(--muted)"></p>';
+    c1.querySelector(".area").textContent=h.region+" · "+h.spot;c1.querySelector("h3").textContent=h.name;c1.querySelector("p").textContent=h.feat;
+    var tg=c1.querySelector(".htags");
+    [[h.dent,"치과 특화","dent"],[h.surg,"수술 특화","surg"],[h.er,"24시 응급","er"],[h.uni,"대학병원",""]].forEach(function(t){
+      if(t[0]){var s=document.createElement("span");s.className="htag "+t[2];s.textContent=t[1];tg.appendChild(s)}
+    });
+    if(!tg.children.length)tg.remove();
+    var c2=document.createElement("dl");
+    [["주소",h.addr],["전화",h.tel||"공식 사이트에서 확인"],["진료시간",h.hours]].forEach(function(r){
+      var dt=document.createElement("dt");dt.textContent=r[0];var dd=document.createElement("dd");dd.textContent=r[1];c2.appendChild(dt);c2.appendChild(dd);
+    });
+    var c3=document.createElement("div");c3.className="acts";
+    var b=document.createElement("a");b.className="btn small";b.href="#book";b.textContent="이 병원으로 예약";
+    b.addEventListener("click",function(){sel.value=h.id;check();});
+    c3.appendChild(b);
+    if(h.tel){var t=document.createElement("a");t.className="btn small ghost";t.href="tel:"+h.tel.replace(/[^0-9]/g,"");t.textContent="전화하기";c3.appendChild(t)}
+    if(h.url){var w=document.createElement("a");w.className="btn small ghost";w.href=h.url;w.target="_blank";w.rel="noopener";w.textContent="공식 사이트";c3.appendChild(w)}
+    row.appendChild(c1);row.appendChild(c2);row.appendChild(c3);
+    return row;
+  }
+  function renderHosp(){
+    list.innerHTML="";
+    var shown=HOSPITALS.filter(function(h){return (fstate.region==="전체"||h.region===fstate.region)&&(!fstate.dent||h.dent)&&(!fstate.er||h.er)&&(!fstate.surg||h.surg)});
+    cnt.textContent=shown.length+"곳을 보여주고 있어요.";
+    if(!shown.length){var p=document.createElement("p");p.className="empty";p.style.padding="20px 0";p.textContent="조건에 맞는 병원이 없어요. 필터를 하나 풀어 보세요.";list.appendChild(p);return}
+    shown.forEach(function(h){list.appendChild(buildRow(h))});
+  }
+  drawFilters();renderHosp();
+
+  /* ---------- 예약 신청 ---------- */
+  var form=document.getElementById("form"), dateEl=document.getElementById("date");
+  function todayStr(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+  dateEl.min=todayStr();
+  function hospital(){return HOSPITALS.filter(function(h){return h.id===sel.value})[0]}
+  function check(){
+    var h=hospital(), msg="";
+    if(h&&dateEl.value&&h.closed.length){
+      var day=new Date(dateEl.value+"T00:00:00").getDay();
+      if(h.closed.indexOf(day)>-1) msg="선택한 날짜는 "+h.name+" 휴진일이에요. 진료시간은 "+h.hours+"이에요.";
+    }
+    document.getElementById("e-date").textContent=msg;
+    return !msg;
+  }
+  sel.addEventListener("change",check);dateEl.addEventListener("change",check);
+  function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2200)}
+  function val(id){return document.getElementById(id).value.trim()}
+  function setErr(id,m){document.getElementById(id).textContent=m;return !m}
+
+  var KEY="meongchi:requests";
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}}
+  function save(a){try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}}
+  var mem=load();
+  function renderHist(){
+    var ul=document.getElementById("hist");ul.innerHTML="";
+    document.getElementById("hist-empty").hidden=mem.length>0;
+    mem.slice().reverse().forEach(function(r){
+      var li=document.createElement("li");
+      var s=document.createElement("span");s.textContent=r.date+" · "+r.hospital+" · "+r.dog;
+      var d=document.createElement("button");d.className="chip";d.type="button";d.textContent="삭제";
+      d.addEventListener("click",function(){mem=mem.filter(function(x){return x.id!==r.id});save(mem);renderHist()});
+      li.appendChild(s);li.appendChild(d);ul.appendChild(li);
+    });
+  }
+  renderHist();
+
+  var lastText="";
+  form.addEventListener("submit",async function(e){
+    e.preventDefault();
+    var ok=true;
+    ok=setErr("e-hospital",sel.value?"":"병원을 선택해 주세요.")&&ok;
+    ok=setErr("e-owner",val("owner")?"":"보호자 이름을 입력해 주세요.")&&ok;
+    var digits=val("phone").replace(/[^0-9]/g,"");
+    ok=setErr("e-phone",(digits.length>=9&&digits.length<=11)?"":"연락처를 숫자 9~11자리로 입력해 주세요.")&&ok;
+    ok=setErr("e-dog",val("dog")?"":"강아지 이름을 입력해 주세요.")&&ok;
+    if(!dateEl.value){ok=setErr("e-date","희망 날짜를 선택해 주세요.")&&ok}
+    else if(dateEl.value<todayStr()){ok=setErr("e-date","오늘 이후 날짜를 선택해 주세요.")&&ok}
+    else{ok=check()&&ok}
+    ok=setErr("e-consent",document.getElementById("consent").checked?"":"개인정보 수집·이용에 동의해 주세요.")&&ok;
+    if(!ok){var first=form.querySelector(".err:not(:empty)");if(first)first.parentNode.querySelector("input,select").focus();return}
+    var h=hospital();
+    var slot=form.querySelector('input[name="slot"]:checked').value;
+    var btn=form.querySelector('button[type="submit"]'), sendErr=document.getElementById("e-send");
+    sendErr.textContent=""; btn.disabled=true; btn.textContent="보내는 중…";
+    try{
+      if(!window.sb) throw new Error("config");
+      var res=await window.sb.from("bookings").insert({
+        hospital_id:h.id, hospital_name:h.name, owner_name:val("owner"), phone:val("phone"),
+        dog_name:val("dog"), breed:val("breed")||null,
+        age:val("age")?Number(val("age")):null, weight:val("weight")?Number(val("weight")):null,
+        visit_date:dateEl.value, time_slot:slot, memo:val("memo")||null
+      });
+      if(res.error) throw res.error;
+    }catch(err){
+      sendErr.textContent = (err&&err.message==="config")
+        ? "예약 서버가 아직 연결되지 않았어요. config.js의 Supabase 주소와 키를 확인해 주세요."
+        : "신청을 보내지 못했어요. 잠시 뒤 다시 시도하거나 병원에 직접 전화해 주세요.";
+      btn.disabled=false; btn.textContent="예약 신청하기"; return;
+    }
+    btn.disabled=false; btn.textContent="예약 신청하기";
+    var lines=["[동물치과 예약 신청]","병원: "+h.name,"희망 일시: "+dateEl.value+" "+slot,"보호자: "+val("owner")+" ("+val("phone")+")",
+      "반려견: "+[val("dog"),val("breed"),val("age")?val("age")+"살":"",val("weight")?val("weight")+"kg":""].filter(Boolean).join(" / "),
+      "내용: "+(val("memo")||"구강검진 희망")];
+    lastText=lines.join("\n");
+    document.getElementById("sum-text").textContent=lastText;
+    document.getElementById("summary").hidden=false;
+    var call=document.getElementById("call");
+    if(h.tel){call.hidden=false;call.removeAttribute("target");call.href="tel:"+h.tel.replace(/[^0-9]/g,"");call.textContent=h.tel+" 전화하기";}
+    else if(h.url){call.hidden=false;call.href=h.url;call.target="_blank";call.rel="noopener";call.textContent="공식 사이트에서 연락처 확인";}
+    else{call.hidden=true;}
+    document.getElementById("sum-warn").textContent="운영자가 병원 일정을 확인한 뒤 연락드려요. 확정 연락 전까지는 예약이 확정된 게 아니에요."+(h.hours==="병원에 문의"?" 이 병원은 진료시간을 확인하지 못했어요.":"");
+    mem.push({id:Date.now(),date:dateEl.value,hospital:h.name,dog:val("dog")});
+    save(mem);renderHist();
+    document.getElementById("summary").scrollIntoView({behavior:"smooth",block:"nearest"});
+    toast("예약 신청을 보냈어요");form.reset();document.getElementById("e-date").textContent="";
+  });
+  document.getElementById("copy").addEventListener("click",function(){
+    function done(){toast("복사했어요")}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(lastText).then(done,fallback)}else fallback();
+    function fallback(){
+      var ta=document.createElement("textarea");ta.value=lastText;document.body.appendChild(ta);ta.select();
+      try{document.execCommand("copy");done()}catch(e){toast("복사하지 못했어요. 직접 선택해서 복사해 주세요")}
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
